@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://kit.fontawesome.com/25ef39d1cb.js" crossorigin="anonymous"></script>
+    <title>Shopping Cart</title>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="top-bar-item">
+            <a href="./index.html" class="page-name">Tech-Store</a>
+            <ul>
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="./index.html">Product</a></li>
+                <li><a href="">About</a></li>
+            </ul>
+            <a href="./shoppingCart.html" class="shopping-cart"><i class="fas fa-shopping-cart"></i></a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content"></div>
+        <div class="total-container">
+            <div class="total-content">
+                <p class="total-price"></p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <ul class="footer-items">
+            <li>
+                <p>©copy-right: Teck-Store</p>
+            </li>
+            <li><a href="http://www.facebook.com"><i class="fab fa-facebook"></i></a></li>
+            <li><a href="http://www.instagram.com"><i class="fab fa-instagram"></i></a></li>
+            <li><a href="http://www.youtube.com"><i class="fab fa-youtube"></i></a></li>
+        </ul>
+    </div>
+
+    <script>
+
+        var cartItems = localStorage.getItem("product");
+        var data = [];
+        if(cartItems != "" || cartItems != "undefined")
+        {
+            data = JSON.parse(cartItems);
+            RenderData();
+        }
+
+        function RenderData(){
+            if(data.length == 0) 
+            {
+                document.querySelector('.content').innerText = "Empty";
+                return;
+            }
+            
+        var content =  document.querySelector('.content');
+        var cartInfo = document.querySelector('.fa-shopping-cart');
+        cartInfo.innerHTML = " " + data.length;
+        data.forEach((item, index) => {
+            var listItems = document.createElement("div");
+            var product = document.createElement("div");
+            var itemTitle =  document.createElement('h2');
+            var image =  document.createElement('img');
+            var description =  document.createElement('p');
+            var price =  document.createElement('div');
+            var quantity =  document.createElement('div');
+            var button =  document.createElement('button');
+            var priceContainer =  document.createElement('div');
+
+            listItems.className = "item-list";
+            product.className = "product";
+            product.id = item.id;
+            itemTitle.className = "item-title";
+            image.className = "image-div";
+            description.className = "description";
+            price.className ="price";
+            quantity.className = "quantity";
+            priceContainer.className = "price-container";
+            button.className ="add-button";
+            button.type ="button";
+            button.textContent = "Remove";
+            button.addEventListener("click", ClickHandler);
+
+            itemTitle.innerHTML = item.title;
+            image.src = "./assets/" + item.image;
+            description.innerHTML = item.description;
+            price.innerHTML = "Price: " + item.price;
+            if(item.quantity > 1)
+            {
+                quantity.innerHTML = "Quantity: " + item.quantity;
+            }
+
+            product.append(itemTitle);
+            product.append(image);
+            product.append(description);
+            priceContainer.append(quantity);
+            priceContainer.append(price);
+            product.append(priceContainer);
+            product.appendChild(button);
+            listItems.append(product);
+
+            listItems.append(product);
+            content.append(listItems);
+
+        });
+        ShowTotal();
+    }
+
+    var home = document.querySelector('.page-name');
+    home.addEventListener('click', NavigateTo);
+    function NavigateTo(){
+        document.location.href = "./index.html";
+    }
+
+    function ClickHandler(e){
+        var div = e.target.parentNode;
+        var clickedItemValue =  e.target.parentNode.children;
+      
+        data = JSON.parse(cartItems);
+        for(var i = 0; i <data.length; i++){
+            if(data[i].id == div.id && data[i].quantity > 1)
+            {
+                var eachPrice =  data[i].price / data[i].quantity;
+                if(data[i].quantity > 1)
+                {
+                    data[i].price -= eachPrice;
+                    data[i].quantity--;
+                }else{
+                    data[i].price /= 2;
+                }
+
+                break;
+            }
+
+            if(data[i].id == div.id && data[i].quantity == 1){
+                data = data.filter(el => {return el.id != div.id});
+            }
+        }
+        var id = e.target.parentElement.parentElement;
+        var elem = document.getElementsByClassName(id.className);
+        for(var el  in elem){
+            var div = document.getElementsByClassName('item-list')[0];
+
+            if(div)
+            div.remove();
+        }
+
+        localStorage.setItem("product", JSON.stringify(data));
+        RenderData();
+        location.reload();
+    }
+
+    function ShowTotal(){
+        document.querySelector(".total-container").style = "display:flex";
+        var totalDiv = document.querySelector(".total-price");
+
+        var totalList = [];
+        var total;
+        data.forEach(item => {
+            var oneItemPrice = item.price;
+            totalList.push(oneItemPrice);
+        });
+        
+        total = totalList.reduce((a,b) => {return (parseInt(a) + parseInt(b))})
+        totalDiv.innerText = "Total: " + total;
+    }
+</script>
+</body>
+</html>
